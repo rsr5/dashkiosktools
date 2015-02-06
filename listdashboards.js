@@ -1,29 +1,36 @@
 #!/usr/bin/env node
 
-var http = require('http');
+var argv = require('minimist')(process.argv.slice(2));
+var _ = require('underscore')._
 
 
-var options = {
-  host: process.argv[2],
-  port: 9400,
-  path: '/api/group'
-};
-
-callback = function(response) {
-  var str = '';
-
-  //another chunk of data has been recieved, so append it to `str`
-  response.on('data', function (chunk) {
-    str += chunk;
-  });
-
-  //the whole response has been recieved, so we just print it out here
-  response.on('end', function () {
-    var groups = JSON.parse(str);
-    for(var group in groups) {
-        console.log(groups[group].id + " >> " + groups[group].name);
-    };
-  });
+if (_.isUndefined(argv.hostname)) {
+  console.log("Need a hostname");
+  process.exit(1);
 }
 
-http.request(options, callback).end();
+
+
+function listDashboards() {
+
+  var request = require('request');
+
+  var options = {
+    url: 'http://' + argv.hostname + ':9400/api/group/',
+    json: true,  }
+
+  console.log(options.url)
+  request.get(
+      options,
+      function (error, response, body) {
+          if (!error && response.statusCode == 200) {
+              console.log(body)
+          } else {
+            console.log("Error: " + response.statusCode)
+          }
+      }
+  );
+
+}
+
+listDashboards();
